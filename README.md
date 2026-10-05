@@ -19,6 +19,18 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
+### Version 5.1.0
+
+Includes controller log ZIP downloads, a read-only Database explorer, saved
+Scenario plays, bidirectional optical turnstiles, lift/IDS corrections and an
+installed simulator version beside **Sign out**. Scenarios currently support
+DDM EM/HSM doors and continue when the browser closes, but not while the host sleeps.
+
+Fresh installations carry only controller build **20261005.2**, commit **a4273c5c**.
+Existing installations keep their selected firmware; the bundled build can be
+selected separately in Controller firmware. Saved user firmware is not deleted.
+Simulator version and controller firmware version are separate identifiers.
+
 Keep the extracted folder. While Docker and ACS Simulator are running, the updater
 checks this repository every five minutes. It verifies a signed release and the
 downloaded hashes, backs up the database, installs the simulator/runtime update and
@@ -27,7 +39,8 @@ Expect a brief interruption of simulated devices during a successful update.
 
 Local login, onboarding details, controller identity, selected controller firmware,
 database and saved firmware are retained. Firmware changes remain a separate action
-in the simulator. Updates wait for controller administration jobs to finish.
+in the simulator. Updates wait for controller administration jobs and active
+scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
 Docker Desktop/Windows upgrades and database-schema migrations are not automatic.
 
