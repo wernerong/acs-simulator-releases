@@ -19,12 +19,17 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
-### Version 5.1.0
+### Version 5.2.0
 
 Includes controller log ZIP downloads, a read-only Database explorer, saved
 Scenario plays, bidirectional optical turnstiles, lift/IDS corrections and an
-installed simulator version beside **Sign out**. Scenarios currently support
-DDM EM/HSM doors and continue when the browser closes, but not while the host sleeps.
+installed simulator version beside **Sign out**. Scenarios support DDM EM/HSM
+doors, LSDI inputs, controller tamper and bounded connection outages. Connection
+lanes run sequentially. Input readback confirms simulator state, not controller
+alarm or recovery delivery. Restoring an input does not reset latched alarms.
+Use **Delete play** to remove a saved play after named confirmation; scenarios
+and run history remain. Runs continue when the browser closes, but not while
+the host sleeps.
 
 Fresh installations carry only controller build **20261005.2**, commit **a4273c5c**.
 Existing installations keep their selected firmware; the bundled build can be
