@@ -19,7 +19,26 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
-### Version 5.2.0
+### Version 5.3.0
+
+Firmware builds now appear once in the chooser. Identical uploads reuse stored
+files, completed transfer ZIPs are removed and redundant deployment copies are
+avoided, while distinct binaries and the latest recovery copy remain protected.
+
+Optional **Read-only MCP access** is available in Deployment settings. Confirm
+your simulator login to enable, rotate or revoke a separate 90-day read token.
+Seven inspection tools read configured devices, transactions, diagnostics and
+masked tables; they cannot operate hardware or administer controller firmware.
+MCP is disabled by default, uses the existing localhost port at `/mcp`, and
+contains no bundled read token. Complete onboarding/DNDS before inspection.
+Save the newly issued token privately in your local MCP client's secret store.
+Your backend key and browser cookie are not MCP credentials. A cloud client
+cannot reach this laptop's localhost without a separately configured secure route.
+
+MCP 0.1.1 fixes bearer-client discovery and request admission: 600 POSTs plus a
+30-request burst per token per rolling minute, separate strict failed-auth limits,
+HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
+v5.3.0 appears beside Sign out.
 
 Includes controller log ZIP downloads, a read-only Database explorer, saved
 Scenario plays, bidirectional optical turnstiles, lift/IDS corrections and an
@@ -27,11 +46,11 @@ installed simulator version beside **Sign out**. Scenarios support DDM EM/HSM
 doors, LSDI inputs, controller tamper and bounded connection outages. Connection
 lanes run sequentially. Input readback confirms simulator state, not controller
 alarm or recovery delivery. Restoring an input does not reset latched alarms.
-Use **Delete play** to remove a saved play after named confirmation; scenarios
+Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-Fresh installations carry only controller build **20261005.2**, commit **a4273c5c**.
+Fresh installations carry only controller build **20261006.2**, commit **3c4e9ea1**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
@@ -43,7 +62,7 @@ checks service health. An unsuccessful update restores the previous images.
 Expect a brief interruption of simulated devices during a successful update.
 
 Local login, onboarding details, controller identity, selected controller firmware,
-database and saved firmware are retained. Firmware changes remain a separate action
+database, saved firmware and enabled MCP configuration are retained. Firmware changes remain a separate action
 in the simulator. Updates wait for controller administration jobs and active
 scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
