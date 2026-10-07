@@ -19,7 +19,19 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
-### Version 5.4.0
+### Version 5.5.0
+
+**Report an issue** captures expected versus actual behavior and recent evidence
+for a door/readers or key cabinet. **Record a test** saves a bounded sequence for
+later review. Review and download a developer ZIP from **Issue reports**, or
+delete unwanted captures after confirmation. Nothing is uploaded automatically;
+there is no built-in AI model or control replay. Review notes before sharing.
+
+A recording follows one selected door or cabinet plus shared input/connection
+actions across navigation. It is not an all-modules recorder. The dashboard and
+cabinet workbench provide these controls; Diagnostics stays inspection-only.
+Capture text/buttons match the surrounding UI, and sidebar navigation is grouped
+into Test bench, Inspect and Manage without inconsistent arrows.
 
 Firmware builds now appear once in the chooser. Identical uploads reuse stored
 files, completed transfer ZIPs are removed and redundant deployment copies are
@@ -27,7 +39,8 @@ avoided, while distinct binaries and the latest recovery copy remain protected.
 
 Optional **MCP access** is available in Deployment settings. Confirm
 your simulator login to enable, rotate or revoke one 90-day MCP token.
-Ten tools provide inspection plus `list_controls`, `prepare_factory_reset` and
+Twelve tools provide inspection, saved issue reads (`list_issue_reports` and
+`get_issue_report`), `list_controls`, `prepare_factory_reset` and
 `execute_control`. Discover configured controls, effects and parameter schemas,
 then choose **Allow physical tests** with your simulator login to enable writes
 using the SAME token. Older read-only configurations do not silently gain writes.
@@ -38,10 +51,10 @@ Save the newly issued token privately in your local MCP client's secret store.
 Your backend key and browser cookie are not MCP credentials. A cloud client
 cannot reach this laptop's localhost without a separately configured secure route.
 
-MCP 0.2.0 retains bearer-client discovery and request admission: 600 POSTs plus a
+MCP 0.3.0 retains bearer-client discovery and request admission: 600 POSTs plus a
 30-request burst per token per rolling minute, separate strict failed-auth limits,
 HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
-v5.4.0 appears beside Sign out. Refresh the client's catalog if it cached seven tools.
+v5.5.0 appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
 
 Physical controls cover door inputs, LSDI/DOR, controller tamper and power, DDM
 fire, cabinet inputs and bounded connections, including individual reader outages.
@@ -63,7 +76,7 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-Fresh installations carry only controller build **20261006.6**, commit **e279419a**.
+Fresh installations carry only controller build **20261007.9**, commit **6a42c7c1**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
@@ -75,7 +88,7 @@ checks service health. An unsuccessful update restores the previous images.
 Expect a brief interruption of simulated devices during a successful update.
 
 Local login, onboarding details, controller identity, selected controller firmware,
-database, saved firmware and enabled MCP configuration are retained. Firmware changes remain a separate action
+database, saved firmware, issue captures and enabled MCP configuration are retained. Firmware changes remain a separate action
 in the simulator. Updates wait for controller administration jobs and active
 scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
