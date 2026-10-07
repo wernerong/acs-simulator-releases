@@ -19,26 +19,39 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
-### Version 5.3.0
+### Version 5.4.0
 
 Firmware builds now appear once in the chooser. Identical uploads reuse stored
 files, completed transfer ZIPs are removed and redundant deployment copies are
 avoided, while distinct binaries and the latest recovery copy remain protected.
 
-Optional **Read-only MCP access** is available in Deployment settings. Confirm
-your simulator login to enable, rotate or revoke a separate 90-day read token.
-Seven inspection tools read configured devices, transactions, diagnostics and
-masked tables; they cannot operate hardware or administer controller firmware.
+Optional **MCP access** is available in Deployment settings. Confirm
+your simulator login to enable, rotate or revoke one 90-day MCP token.
+Ten tools provide inspection plus `list_controls`, `prepare_factory_reset` and
+`execute_control`. Discover configured controls, effects and parameter schemas,
+then choose **Allow physical tests** with your simulator login to enable writes
+using the SAME token. Older read-only configurations do not silently gain writes.
+**Disable physical tests** revokes writes without removing inspection access.
 MCP is disabled by default, uses the existing localhost port at `/mcp`, and
-contains no bundled read token. Complete onboarding/DNDS before inspection.
+contains no bundled MCP token. Complete onboarding/DNDS before inspection.
 Save the newly issued token privately in your local MCP client's secret store.
 Your backend key and browser cookie are not MCP credentials. A cloud client
 cannot reach this laptop's localhost without a separately configured secure route.
 
-MCP 0.1.1 fixes bearer-client discovery and request admission: 600 POSTs plus a
+MCP 0.2.0 retains bearer-client discovery and request admission: 600 POSTs plus a
 30-request burst per token per rolling minute, separate strict failed-auth limits,
 HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
-v5.3.0 appears beside Sign out.
+v5.4.0 appears beside Sign out. Refresh the client's catalog if it cached seven tools.
+
+Physical controls cover door inputs, LSDI/DOR, controller tamper and power, DDM
+fire, cabinet inputs and bounded connections, including individual reader outages.
+Actions require matching installation/controller scope and configuration revision;
+shared scenario/maintenance locks and durable retry protection guard execution.
+Factory reset requires a prepared one-use confirmation and human approval.
+Callers are responsible for their actions and controller/backend consequences.
+Card/PIN workflows, saved-play MCP execution, SQL writes, settings edits and firmware
+administration are not exposed. Readback is physical simulator evidence, not an
+access grant or proof of backend delivery.
 
 Includes controller log ZIP downloads, a read-only Database explorer, saved
 Scenario plays, bidirectional optical turnstiles, lift/IDS corrections and an
@@ -50,7 +63,7 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-Fresh installations carry only controller build **20261006.2**, commit **3c4e9ea1**.
+Fresh installations carry only controller build **20261006.6**, commit **e279419a**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
