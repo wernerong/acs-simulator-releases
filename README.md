@@ -19,7 +19,21 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
-### Version 5.5.0
+### Version 5.6.0
+
+The controller monitor now offers **Transactions** and **Live logs**, with
+bottom/right docking, a separate window, and an adjustable bottom-panel height.
+Live logs use bounded incremental reads and stop polling when hidden or paused.
+Backend connection tests show an outage countdown and retain offline resend
+choices. Cabinet accountability transactions have clearer descriptions.
+
+CAU IP card taps now follow the controller's downloaded mode definition and
+Access Ledger in Normal, Secure and Supervised modes. Supported flows verify
+Card, request PIN only when required, then submit one access intent. The
+controller owns PIN attempts and approval; waiting for supervision is not an
+access grant. Serial reader behavior is unchanged. Required biometric,
+multiple-participant and unsupported fallback flows fail closed; this does not
+add biometric recognition, IP IDS or card/PIN tools to MCP.
 
 **Report an issue** captures expected versus actual behavior and recent evidence
 for a door/readers or key cabinet. **Record a test** saves a bounded sequence for
@@ -54,7 +68,7 @@ cannot reach this laptop's localhost without a separately configured secure rout
 MCP 0.3.0 retains bearer-client discovery and request admission: 600 POSTs plus a
 30-request burst per token per rolling minute, separate strict failed-auth limits,
 HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
-v5.5.0 appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
+v5.6.0 appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
 
 Physical controls cover door inputs, LSDI/DOR, controller tamper and power, DDM
 fire, cabinet inputs and bounded connections, including individual reader outages.
@@ -76,7 +90,7 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-Fresh installations carry only controller build **20261007.9**, commit **6a42c7c1**.
+Fresh installations carry only controller build **20261008.6**, commit **8c92e188**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
