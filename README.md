@@ -192,7 +192,7 @@ existing Raspberry Pi or Mac installations. Screenshots illustrate the shared
 simulator interface; host-specific setup and administration can differ.
 
 <details>
-<summary>Detailed setup, update behavior and 5.6.1 release changes</summary>
+<summary>Detailed setup, update behavior and 5.6.2 release changes</summary>
 
 ## Windows x64
 
@@ -209,6 +209,32 @@ device certificates. Never post your API key, passwords or private diagnostics h
 Your laptop must be able to reach your backend; use only an authorized test backend.
 
 ## Updates
+
+### Version 5.6.2
+
+Full-height turnstile passages follow the controller-approved direction: entry
+enables **Pass IN**, while exit approval or an enabled exit request enables
+**Pass OUT**. The buttons sit on their respective sides and rotate oppositely.
+Wrong-side attempts do not consume the shared single passage. Unlock modes and
+fire release retain repeated bidirectional movement.
+
+Optical fire release now reports the released lock with a closed contact first,
+then opens the contact on a subsequent complete controller read. Partial reads
+and writes do not consume that first sample.
+
+A short optical remote-unlock pulse on both outputs now retains one passage
+after the pulse ends. Choose **Pass IN** or **Pass OUT**; the first passage
+consumes the shared permit for both sides. Unused permits still expire, and
+continuous held unlock retains free movement while active.
+
+The firmware settings explanation is clearer. On native Pi, **Keep current Pi
+settings** now preserves values inherited from current base settings instead of
+restoring removed uploaded environment overrides such as RabbitMQ EnableTLS.
+The Windows adapter already preserves effective settings and keeps that behavior.
+The Windows package does not deploy changes to a separate native Pi.
+
+The version stamp is **Simulator v5.6.2**. Bundled firmware and schema are unchanged
+from 5.6.1; automatic updates preserve existing selected firmware and local data.
 
 ### Version 5.6.1
 
@@ -280,7 +306,7 @@ cannot reach this laptop's localhost without a separately configured secure rout
 MCP 0.3.0 retains bearer-client discovery and request admission: 600 POSTs plus a
 30-request burst per token per rolling minute, separate strict failed-auth limits,
 HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
-v5.6.1 appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
+The installed simulator version appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
 
 Physical controls cover door inputs, LSDI/DOR, controller tamper and power, DDM
 fire, cabinet inputs and bounded connections, including individual reader outages.
