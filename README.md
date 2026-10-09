@@ -19,6 +19,27 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Updates
 
+### Version 5.6.1
+
+Controller firmware uploads and saved-version switching no longer require
+supporting DLLs to match a bundled-build hash list. Use your authorized controller
+firmware ZIP with its own managed dependencies, including different branches.
+This fixes the rejection of otherwise compatible builds in 5.6.0 and earlier
+managed releases. Both public and private installers share the fix.
+
+Fresh installations use the updated table schema: key tracking includes names
+for the person taking/returning a key, and face templates support 4000 characters.
+Existing installations receive the same three additive changes before controller
+startup, with a retained database backup. No existing records are deleted or
+rewritten, and the selected controller firmware stays unchanged.
+
+The .NET 10 and portable identity-adapter compatibility checks, ZIP safety,
+settings preservation, database backup and activation checks remain. Firmware
+must still be compatible with the portable runtime; this does not guarantee
+every future controller build. Signed automatic simulator updates continue to
+verify their signatures and hashes. Existing users need no reinstall: after
+the simulator updates, upload the previously rejected ZIP again.
+
 ### Version 5.6.0
 
 The controller monitor now offers **Transactions** and **Live logs**, with
@@ -106,7 +127,8 @@ database, saved firmware, issue captures and enabled MCP configuration are retai
 in the simulator. Updates wait for controller administration jobs and active
 scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
-Docker Desktop/Windows upgrades and database-schema migrations are not automatic.
+Docker Desktop/Windows upgrades and incompatible database migrations are not
+automatic. Version 5.6.1 includes only the reviewed additive schema changes above.
 
 **Start.cmd** runs it. **Stop.cmd** stops it without deleting data.
 **Diagnose.cmd** includes the update status. **Uninstall.cmd** asks for confirmation
