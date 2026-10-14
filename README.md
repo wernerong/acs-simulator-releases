@@ -70,6 +70,41 @@ Windows package and this SDK download.
 
 </details>
 
+### Pair physical readers with simulated doors
+
+On native Raspberry Pi deployments, a compatible physical ACS reader can replace
+a virtual reader while the simulator continues modelling the DDM, door movement,
+contacts and lock feedback. Real card taps or supported biometric scans follow
+the controller's normal credential verification, access decisions and backend
+reporting. Transactions and live logs remain visible beside the simulated door
+controls.
+
+```mermaid
+flowchart LR
+    Reader["Physical ACS reader"] <-->|"TCP or RS422 bridge"| Controller["Real ACS controller"]
+    Controller <--> Door["Simulated DDM and door"]
+    Controller <-->|"Transactions and configuration"| Backend["ACS backend"]
+```
+
+The native Pi's **Manage → Physical readers** page selects physical or simulated
+operation using the current controller configuration.
+
+| Connection | How pairing works |
+| --- | --- |
+| IP reader | Connects directly to the controller's configured TCP listener. The reader's source IP identifies its configured IN/OUT role; virtual inputs for that reader are disabled while physical mode is selected. |
+| RS422 serial reader | Connects through a USB-to-RS422 converter and the simulator's serial bridge. Physical mode replaces all virtual readers on the selected bus and forwards the actual reader protocol. |
+
+Physical IP-reader face and iris operation has been confirmed on the native Pi
+with compatible templates and downloaded enrollments. Serial hardware acceptance
+remains pending. Compatible ACS reader firmware, network or serial settings, and
+backend reader configuration are required; arbitrary reader protocols are not
+translated.
+
+**The Windows Docker package does not currently expose physical-reader setup.**
+Docker networking/source-IP mapping and serial transport require separate
+validation. The optional ARM64 SDK download supports compatible native
+deployments; it does not enable Windows iris support.
+
 ### Key cabinets
 
 Choose a cardholder, request an authorized key or group, open the cabinet and
