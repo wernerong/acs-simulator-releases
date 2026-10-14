@@ -51,7 +51,17 @@ Serial and IP readers support the implemented card/PIN flows, including Normal,
 Secure and Supervised access. Door models include EM locks, HSM120/HSM220,
 sliding doors, starter doors, 120-degree turnstiles and optical gates.
 The controller decides access and relocking; a button press is not an access grant.
-Required biometric recognition and unsupported multi-person IP flows are not simulated.
+Windows 5.7.0 includes enrolled/unrecognised face inputs and a calibrated Baidu
+RGB comparison adapter for compatible templates. The controller retains matching
+thresholds and access decisions. Unsupported biometric formats and multi-person
+IP flows are not simulated. Physical reader networking/source-IP mapping requires
+separate validation on Docker hosts.
+
+An optional **Linux ARM64 biometric runtime** is provided as a separate release
+download for native simulator deployments. It contains independent face/iris
+comparison libraries and deployment notes, without source or vendor SDK files.
+It does not enable Windows iris support. Enrollment is excluded from both the
+Windows package and this SDK download.
 
 <details>
 <summary>See the dashboard and navigation</summary>
