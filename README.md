@@ -111,6 +111,12 @@ Choose a cardholder, request an authorized key or group, open the cabinet and
 take or return keys. Follow the on-screen visit steps and slot inventory.
 Check misplaced keys, exercise wrong-slot returns and observe controller outcomes.
 
+Version 5.8.0 detects the controller's cabinet API before each visit. Newer
+firmware uses controller-owned sessions; older branches retain their user/card
+API flow. Checkout, returns and two-card keys follow the detected contract.
+Expired or mismatched sessions require a new card tap, without silently retrying
+through the older API. Changing controller firmware also requires a fresh visit.
+
 ![Key cabinet with sample key slots, cardholder selection and take or return controls](https://raw.githubusercontent.com/wernerong/acs-simulator-releases/main/docs/images/key-cabinet.png)
 
 ### Inputs, alarms and connection faults
