@@ -232,6 +232,343 @@ model to the simulator. It does not expose arbitrary shell/SQL writes or firmwar
 administration. Factory reset requires prepared, one-use human confirmation.
 You remain responsible for test actions and their backend effects.
 
+### Full MCP tool catalog
+
+Public and private **Windows 5.8.0** packages both use MCP server **0.4.0** and
+expose these **17 tools**; Windows 5.7.0 already carries the same catalog.
+Older installations may show fewer tools until updated. Reconnect/refresh your
+client's tool list after updating. All names remain discoverable while writes
+are disabled; permission is checked when a tool is called. The same token is
+used after owner write opt-in, including for reset preparation.
+
+<!-- mcp-tool-catalog:start -->
+| Tool | Access | What it does |
+| --- | --- | --- |
+| `get_instance_info` | Read | Identify the installation/controller, firmware branch/build, capabilities, limits and current write permission. Call this first. |
+| `list_devices` | Read | List configured device IDs, names, kinds and mapped hardware routes; supports kind filtering and pagination. |
+| `get_device_state` | Read | Read one device's observed simulator state and controller status codes, including freshness/unavailable indicators. |
+| `get_transactions` | Read | Read paginated controller send attempts, readable descriptions, reader direction and HTTP outcomes; acceptance is not proof of backend storage/display. |
+| `get_diagnostics` | Read | Read bounded, grouped controller failures and service health with masked evidence and source timestamps. |
+| `list_tables` | Read | Discover public-schema database tables, approximate row counts and masked columns. |
+| `read_table` | Read | Read masked table rows with paging, search and sorting; no arbitrary SQL, credential values or biometric templates. |
+| `list_issue_reports` | Read | List locally saved issue-report summaries for this controller; does not start a recording. |
+| `get_issue_report` | Read | Read expected/actual notes and paginated reproduction events; page zero includes bounded related evidence. Does not replay actions. |
+| `list_controls` | Read | Discover configured physical controls, allowed actions, parameter schemas, effects, fixed routes and the configuration revision needed to execute. |
+| `prepare_factory_reset` | Prepare; write opt-in | Prepare a one-use, 120-second confirmation bound to the exact reset request. Does not reset the controller; human approval is still required before execution. |
+| `execute_control` | Write opt-in | Execute an action discovered by `list_controls`, with scope/revision, ownership, maintenance and durable duplicate checks. Reset requires the prepared confirmation. |
+| `list_plays` | Read | List saved Scenario Builder plays, IDs, lane bindings and revisions covering the play plus its scenarios; excludes unsaved drafts. |
+| `validate_play` | Read | Check a saved play's revision, current mappings and capabilities without running it; validation is neither a reservation nor a passed test. |
+| `start_play` | Write opt-in | Start one saved play and return its run ID; the runner continues after client closure. Identical retries reuse the original request ID and do not start another run. |
+| `get_run` | Read | Read status and paginated progress for an MCP-started run in this controller scope, including `active`, `needs_review` and the next event cursor. |
+| `stop_run` | Write opt-in | Request Stop & restore for an MCP-started run. Poll until cleanup finishes; this does not clear controller alarms or acknowledge uncertain recovery. |
+<!-- mcp-tool-catalog:end -->
+
+### Discoverable physical actions
+
+These are action families returned by `list_controls`, not additional MCP tool
+names. Availability depends on configured devices, enabled inputs and physical
+versus simulated reader ownership. Use the returned IDs/actions/schemas; do not
+invent a device route.
+
+- **Doors/readers:** contact open/close/stop, exit press/release, lock-feedback
+  fault/auto, key switch, break glass, wiring faults and simulated reader tamper.
+- **Turnstiles:** IN/OUT 120-degree or optical passage, subject to the existing
+  controller release and direction guards.
+- **Inputs/outputs:** LSDI normal/event/line cut/short and DOR open/close overrides.
+- **Connections:** modeled board/reader buses, individual serial/IP readers and
+  backend connectivity. Offline tests use a 1-3600-second duration (default 60).
+- **Controller/DDM:** controller tamper 1/2, modeled mains/battery/0-30 V supply
+  and shared DDM fire inputs.
+- **Cabinets:** door/tamper inputs and misplaced-key scan. Direct card authorization,
+  key checkout/return and second-card workflow tools are not exposed.
+- **Factory reset:** guarded trigger plus explicit switch restoration. Preparation
+  requires write opt-in; explain data loss and obtain human confirmation first.
+
+Opening a contact is not an unlock/access grant. Hardware restoration does not
+clear latched controller alarms; controller commands can overwrite DOR overrides.
+Actions may generate real controller/backend transactions. The caller remains
+responsible for their effects.
+
+### Using the tools
+
+1. Call `get_instance_info`, then pass its installation/controller IDs to the
+   other tools. Follow list/event pagination to obtain all available results.
+2. For physical actions, discover `control_id`, parameters and
+   `configuration_revision` through `list_controls`. For a saved play, discover
+   its ID and `play_revision` through `list_plays` and optionally validate it.
+3. Request only the intended action. Use a new `request_id` per deliberate
+   action/start; retry a lost response with that same ID and identical arguments.
+4. After `start_play`, poll `get_run` for status and review flags. `stop_run`
+   requests cleanup; it is not proof cleanup has already finished.
+
+Example requests to your connected assistant:
+
+- "List my devices and explain the latest denied access. Do not operate controls."
+- "Read the latest saved cabinet issue, including every event page."
+- "List saved plays, validate the one I select, and wait for my instruction to start."
+
+Create/edit/delete plays and record issues in the browser. MCP has no direct
+card/PIN/face/iris presentation, key checkout/return, IP IDS workflow, arbitrary
+shell/SQL write, settings-edit or firmware-administration tool. Saved plays use
+only the Scenario Builder's supported blocks and guards, not arbitrary scripts.
+
+<details>
+<summary>All MCP write controls: exact actions, parameters and safeguards</summary>
+
+<!-- mcp-write-controls:start -->
+### Write request contract
+
+This is the complete implemented physical-action reference for MCP 0.4.0.
+Public/private packages use the same controls and permission checks. These are
+**actions of `execute_control`**, not additional MCP tool names. A particular
+installation exposes only its configured controls. Always discover the current
+`control_id`, `actions`, `parameters`, `fixed_parameters` and
+`configuration_revision` through every page of `list_controls`.
+
+All write calls require the existing token with owner-enabled writes, matching
+installation/controller identity, valid current configuration and the shared
+scenario/firmware-maintenance guards. A listed action is not a guarantee that
+the device is currently able to perform it. Physical-reader ownership, release
+direction, freshness and controller-side rules still apply.
+
+| `execute_control` argument | Required value |
+| --- | --- |
+| `expected_instance_id`, `expected_controller_id` | IDs returned by `get_instance_info`; never another installation's IDs. |
+| `configuration_revision` | Top-level revision returned by the current `list_controls` response. |
+| `control_id` | Opaque ID from the selected catalog item. `kind`, `target` and fixed routing values are resolved by the server, not caller overrides. |
+| `action` | Exact action name from that item's `actions`; see the tables below. |
+| `request_id` | One new 16-80-character ASCII letters/digits/underscore/hyphen ID per intentional action. Persist it before sending; identical network retries use the same ID and arguments. |
+| `parameters` | JSON object containing only the caller parameters below. Omit it or use `{}` where none are needed. Maximum serialized size: 2,048 characters. Do not copy `fixed_parameters` into it. |
+| `confirmation_id` | Only for `factory-reset/trigger`: the one-use value returned by `prepare_factory_reset` for this exact request. Omit otherwise. |
+
+The tables list every advertised kind/action pair. An empty parameter object is
+written as `{}`. Restore actions require a **new** request ID, since they are
+new intentional operations, not retries of the original action.
+
+### Door contacts, inputs and reader tamper
+
+A door control requires a configured door and its enabled input/feedback.
+Targets may be DDM doors or `starter-...` doors as returned by discovery.
+Reader tamper is available for configured simulated IN/OUT readers on non-starter
+stations; physical-owned readers and starter-reader controls are excluded.
+
+| Kind | Action | Caller parameters | Effect and restoration |
+| --- | --- | --- | --- |
+| `door` | `open` | `{}` | Move the modeled contact open; a starter sliding door starts manual opening. Does not unlock the controller output and may cause break-in. Restore with `close`. |
+| `door` | `close` | `{}` | Move the contact closed or start closing a starter sliding door. Does not clear latched software alarms. |
+| `door` | `stop` | `{}` | Stop manual movement of a starter sliding door. Catalog limitation: also advertised for other contact controls, but the bundled DDM contact helper and non-sliding starter handler reject it. |
+| `exit` | `press` | `{}` | Momentary exit request; automatically releases after approximately one second. Controller decides whether to release the door. |
+| `exit` | `release` | `{}` | Explicitly restore the exit-request input to released. |
+| `lock` | `failed` | `{}` | Force modeled lock-feedback failure, not an unlock command. Restore with `auto`. |
+| `lock` | `auto` | `{}` | Remove the forced lock-feedback fault and return to modeled automatic feedback. |
+| `key-switch` | `activate` | `{}` | Activate the key-switch input; controller responses/alarms may follow. Restore the input with `reset`. |
+| `key-switch` | `reset` | `{}` | Restore the key-switch hardware input only; software alarms may remain latched until a controller reset command. |
+| `break-glass` | `activate` | `{}` | Activate the break-glass input; controller responses/alarms may follow. Restore the input with `reset`. |
+| `break-glass` | `reset` | `{}` | Restore break-glass hardware only, not a latched controller alarm. |
+| `wiring` | `auto` | `{}` | Remove the wiring override for the server-selected input and resume normal modeling. |
+| `wiring` | `linecut` | `{}` | Simulate a cut wire on the selected input; restore with `auto`. |
+| `wiring` | `lineshort` | `{}` | Simulate a shorted wire on the selected input; restore with `auto`. |
+| `reader-tamper` | `activate` | `{}` | Activate tamper for the server-selected simulated reader direction. Restore with `reset`. |
+| `reader-tamper` | `reset` | `{}` | Restore that reader's tamper input; controller alarms may still require reset. |
+
+Each wiring control fixes `input` to one of `contact`, `lock`, `exit`,
+`key-switch`, `break-glass`. Each reader-tamper control fixes `direction`
+to `in` or `out`. Select the correct returned control; neither value is a
+caller parameter for these kinds. Removing a wiring fault does not change a
+separately activated input back to normal.
+
+### Mechanical and optical turnstile passage
+
+| Kind | Action | Caller parameters | Prerequisites and effect |
+| --- | --- | --- | --- |
+| `turnstile` | `pass` | `{"cycle":"<current cycle>","direction":"in"}` or direction `out` | Configured non-starter mechanical turnstile with a fresh, available release in this direction. Consume one 120-degree passage; controller unlock/fire release can permit repeated free rotation. |
+| `optical-pass` | `pass` | `{"cycle":"<current direction cycle>","direction":"in"}` or direction `out` | Configured non-starter optical turnstile with an available, unexpired direction grant or held/manual release. Consume that passage, not an invented access grant. |
+
+Both fields are required. `direction` is exactly `in` or `out`. `cycle`
+must be the current observed value, not a client-generated UUID; both handlers
+validate a 1-100-character identifier matching
+`[A-Za-z0-9][A-Za-z0-9:._-]{0,99}`.
+Use `get_device_state` for the catalog item's `device_id`, then the
+`data.observations` entry whose `collection` is `doors`:
+
+- Mechanical: `state.turnstile.cycle`, with `available` true and the requested
+  direction present in `state.turnstile.directions`.
+- Optical: `state.optical.directions.in` or `.out`, using that entry's
+  `cycle` and `available` flag. The handler rereads controller wire evidence.
+- Do not hard-code `free`/`fire`, reuse a consumed release for a new passage,
+  or infer permission just because a card was presented. There is no undo-pass
+  action; a new passage needs the applicable current release.
+
+### LSDI inputs and DOR relays
+
+These require a configured LSDI (device type 2) or DOR (type 3), present in
+discovery. The server fixes the device-to-SIO mapping.
+
+| Kind | Action | Caller parameters | Effect and restoration |
+| --- | --- | --- | --- |
+| `lsdi` | `normal` | `{}` | Restore the selected input to its normal state. |
+| `lsdi` | `event` | `{}` | Assert the input event; controller rules determine alarms/output responses. Restore with `normal`. |
+| `lsdi` | `linecut` | `{}` | Simulate an input line cut; restore with `normal`. |
+| `lsdi` | `lineshort` | `{}` | Simulate an input short circuit; restore with `normal`. |
+| `dor` | `open` | `{}` | Set modeled relay contact open (feedback 0). Does not mean universal electrical ON or OFF; controller commands can overwrite it. |
+| `dor` | `close` | `{}` | Set modeled relay contact closed (feedback 1). Restore the previously recorded contact state as required. |
+
+### Connections and backend outages
+
+| Kind | Action | Caller parameters | Effect and restoration |
+| --- | --- | --- | --- |
+| `link` | `offline` | Optional `{"seconds":60}`; integer 1-3600, default 60 | Interrupt only the discovered route. The modeled outage expires automatically; `online` cancels it early. |
+| `link` | `online` | `{}`; do not send `seconds` | Remove that route's simulated outage. Actual reconnection/status recovery may take time. |
+| `backend` | `offline` | Optional `{"seconds":60}`; integer 1-3600, default 60 | Temporarily filter controller-to-backend connectivity. Queued traffic may be delayed; automatic timed restoration or explicit `online`. |
+| `backend` | `online` | `{}`; do not send `seconds` | Remove the modeled backend outage; does not prove delivery or clear queued work. |
+
+`seconds` must be an integer, not a string, fraction or Boolean. Link targets
+are selected by `control_id`, never submitted as parameter overrides:
+
+| Discovered target | Scope / availability |
+| --- | --- |
+| `mainboard` | Modeled mainboard communication route. |
+| `ddm1`, `ddm2` | Each configured DDM bus; affects the devices on that route. |
+| `ioboard` | Shared SIO communication bus when configured SIO LSDI/DOR/starter devices exist. |
+| `reader1`, `reader2` | Configured simulated serial-reader bus; affects its readers. |
+| `readerN-address` | One configured simulated serial reader, e.g. `reader1-2`; bus and peers stay running. Lift reader communication routes can appear without a physical door station. |
+| `ip-reader` | All simulated IP-reader TCP connections; not a network-wide outage of physical readers. |
+| `ip-<address>` | One configured simulated IP reader; suppress its responses without dropping shared TCP/peers. Use the exact target returned by discovery. |
+
+Physical-owned reader routes are excluded/blocked by the ownership policy.
+An offline/online operation does not change that policy or the controller's
+configuration. Restoration does not promise an immediate online transaction.
+
+### Controller tamper, power and DDM fire
+
+Tamper and power are controller-level modeled signals, not host power controls.
+Fire controls require a configured DDM board and are shared by its connected
+doors; this is not a per-door fire-enable configuration switch.
+
+| Kind | Action | Caller parameters | Target, effect and restoration |
+| --- | --- | --- | --- |
+| `tamper` | `normal` | `{}` | Controller tamper target `1` or `2`: restore normal. |
+| `tamper` | `event` | `{}` | Assert that tamper input; restore with `normal`. |
+| `tamper` | `linecut` | `{}` | Simulate its line cut; restore with `normal`. |
+| `tamper` | `lineshort` | `{}` | Simulate its short circuit; restore with `normal`. |
+| `power` | `normal` | `{}` | Target `mains`: restore mains availability. |
+| `power` | `fail` | `{}` | Target `mains`: simulate mains failure; restore with `normal`. |
+| `power` | `full` | `{}` | Target `battery`: report a full battery. |
+| `power` | `low` | `{}` | Target `battery`: report a low battery. |
+| `power` | `charging` | `{}` | Target `battery`: report charging. |
+| `power` | `missing` | `{}` | Target `battery`: report a missing battery. |
+| `power` | `set` | Required `{"voltage":12.0}`; JSON number 0-30, increments of 0.1 | Target `voltage`: set modeled supply voltage. Strings, Booleans and extra decimal precision are rejected. |
+| `fire` | `trigger` | `{}` | Target `ddm1` or `ddm2`: assert shared fire input; affected doors may release. Restore with `reset`. |
+| `fire` | `reset` | `{}` | Restore the board's fire hardware input only. Controller software alarms/release state follow controller logic. |
+
+Choose the desired battery state explicitly to restore it; there is no
+battery `reset` or `auto` action. Record the previous voltage and restore that
+number explicitly. None of these operations turns off the Pi/laptop.
+
+### Cabinets
+
+Requires a configured cabinet (device type 161), with the controller and cabinet
+runtime available for the requested operation. Cabinet authorization remains
+with the controller.
+
+| Kind | Action | Caller parameters | Effect and restoration |
+| --- | --- | --- | --- |
+| `ekms` | `door` | Required `{"value":"open"}` or `{"value":"close"}` | Change the modeled cabinet door input. This does not grant access or unlock a key. Restore the previous door state explicitly. |
+| `ekms` | `tamper` | Required `{"value":"activate"}` or `{"value":"reset"}` | Change the cabinet tamper input; `reset` restores hardware, not controller alarm acknowledgement. |
+| `ekms` | `check-misplaced` | `{}`; do not send `value` | Request the controller's misplaced-key check and return its checked time, summary and mapped keys/slots. It does not move keys or repair assignments. |
+
+The catalog shows a combined `value` enum; allowed values are action-specific
+as shown above. Although misplaced-key checking retrieves a result, it is
+dispatched through `execute_control` and still requires write opt-in.
+
+### Destructive factory reset
+
+| Kind | Action | Caller parameters | Prerequisites and effect |
+| --- | --- | --- | --- |
+| `factory-reset` | `trigger` | `{}`, plus top-level `confirmation_id` | Requires a prepared, unexpired confirmation and DIP bank 2 switch 1 currently OFF. Sets it ON to request controller factory reset; identity/configuration/onboarding/database state may be erased. |
+| `factory-reset` | `restore-switch` | `{}`; no `confirmation_id` | Explicitly set DIP bank 2 switch 1 OFF. This does not restore erased data and is never an automatic OFF/ON retrigger. |
+
+1. Explain the destructive consequence to the human. Discover the reset control,
+   check the current scope/revision and choose a new `request_id`.
+2. Call `prepare_factory_reset` with scope, revision, control ID and that request
+   ID. Preparation requires writes enabled but does **not** trigger a reset.
+3. Obtain explicit human approval. The confirmation lasts **120 seconds** and
+   is bound to the credential, scope, revision, control and exact request.
+   If it expires, inspect the state and prepare again; do not bypass it.
+4. Call `execute_control` with the same scope/revision/control/request ID,
+   `action: "trigger"`, `parameters: {}` and returned `confirmation_id`.
+   It is one-use. An identical retry returns the recorded result, not a new reset.
+5. Inspect the result/controller. When appropriate, make a separate
+   `restore-switch` request with a new request ID and no confirmation.
+   If reset leaves the device table empty, only switch restoration backed by a
+   recorded successful MCP reset in the original scope/revision is permitted.
+   Other recovery is performed through the owner dashboard. A changed controller
+   identity does not grant access to the new controller through the old scope.
+
+Generic DIP writes are deliberately not exposed as an alternative reset path.
+
+### Saved-play write interfaces
+
+These are standalone MCP tools, not `execute_control` actions.
+
+| Tool | Arguments beyond instance/controller scope | Effect and prerequisites |
+| --- | --- | --- |
+| `start_play` | `play_id`, `play_revision` (64 lowercase hex characters), `request_id` | Start the selected saved play once, with owner-enabled writes, current revision/mappings and ownership/maintenance checks. Returns `data.run_id`; acceptance is not successful completion. Unsaved drafts are unavailable. |
+| `stop_run` | `run_id` | Request normal Stop & restore for an MCP-started run in this controller scope. Requires writes enabled. Repeated calls are safe; no request ID or reset confirmation is needed. |
+
+Use `list_plays` and optionally `validate_play` first. A play revision covers
+both the play and referenced scenarios. One active play is allowed per instance;
+concurrency belongs inside that play. Client closure does not stop the runner.
+Poll `get_run` with `after`/`next_after` until `active` is false, then review
+`status` and `needs_review`. Stop restores run-owned inputs; it does not clear
+controller alarms or acknowledge uncertain recovery. Browser-started runs are
+not exposed by these MCP run tools. Creating/editing/deleting plays is a browser
+operation.
+
+### Example control request and outcome handling
+
+After discovering an LSDI control, an intentional event request has this form.
+Placeholders must come from the current installation; this example is not a
+ready-to-run command and may generate controller/backend alarm transactions.
+
+```json
+{
+  "expected_instance_id": "<instance_id>",
+  "expected_controller_id": "<controller_id>",
+  "configuration_revision": "<revision from list_controls>",
+  "control_id": "<LSDI control_id from list_controls>",
+  "action": "event",
+  "request_id": "lsdi-event-example-0001",
+  "parameters": {}
+}
+```
+
+To restore the input, deliberately send `action: "normal"` for the same current
+control/revision with a **different** request ID. Do not resend the original ID
+with changed arguments.
+
+- Inspect both `data.result` and `data.readback`, then controller transactions/
+  diagnostics as needed. A successful tool response or physical readback alone
+  does not prove access was granted or backend processing finished.
+- Direct controls have no general automatic cleanup on client disconnection.
+  Only documented momentary/timed operations restore automatically; otherwise
+  restore the requested input/state explicitly. Hardware restoration is not
+  software-alarm reset.
+- Completed physical-control requests are retained for 30 days. Uncertain/
+  pending requests never expire automatically. Do not rely on a completed
+  physical-action ID to deduplicate beyond that window.
+- Saved-play start intents do not automatically expire; retries use the same
+  arguments/credential and request ID even if run history has been pruned.
+  Uncertain outcomes require inspection, not a blind new ID.
+- Stale revision, wrong scope, write-disabled, physical ownership or active
+  maintenance can reject a request. Refresh/inspect the reason before a new
+  deliberate attempt. There is no generic shell, SQL-write, firmware/settings
+  administration, direct card/PIN/face/iris presentation, key checkout/return
+  or controller software-alarm-reset action.
+<!-- mcp-write-controls:end -->
+
+</details>
+
 ## Help and release details
 
 Contact the person who supplied your installer. Use **Diagnose.cmd**, Diagnostics
@@ -342,7 +679,7 @@ avoided, while distinct binaries and the latest recovery copy remain protected.
 
 Optional **MCP access** is available in Deployment settings. Confirm
 your simulator login to enable, rotate or revoke one 90-day MCP token.
-Twelve tools provide inspection, saved issue reads (`list_issue_reports` and
+In this historical 5.6.0 release, twelve tools provide inspection, saved issue reads (`list_issue_reports` and
 `get_issue_report`), `list_controls`, `prepare_factory_reset` and
 `execute_control`. Discover configured controls, effects and parameter schemas,
 then choose **Allow physical tests** with your simulator login to enable writes
@@ -356,7 +693,7 @@ cannot reach this laptop's localhost without a separately configured secure rout
 
 MCP 0.3.0 retains bearer-client discovery and request admission: 600 POSTs plus a
 30-request burst per token per rolling minute, separate strict failed-auth limits,
-HTTP 429/Retry-After, and exempt discovery/session housekeeping. Simulator
+HTTP 429/Retry-After, and exempt discovery/session housekeeping.
 The installed simulator version appears beside Sign out. Refresh the client's catalog if it cached an older tool list.
 
 Physical controls cover door inputs, LSDI/DOR, controller tamper and power, DDM
@@ -365,8 +702,9 @@ Actions require matching installation/controller scope and configuration revisio
 shared scenario/maintenance locks and durable retry protection guard execution.
 Factory reset requires a prepared one-use confirmation and human approval.
 Callers are responsible for their actions and controller/backend consequences.
-Card/PIN workflows, saved-play MCP execution, SQL writes, settings edits and firmware
-administration are not exposed. Readback is physical simulator evidence, not an
+In 5.6.0, card/PIN workflows, saved-play MCP execution, SQL writes, settings edits
+and firmware administration are not exposed. Windows 5.7.0/5.8.0 add saved-play
+MCP execution; use the current catalog above for available tools. Readback is physical simulator evidence, not an
 access grant or proof of backend delivery.
 
 Includes controller log ZIP downloads, a read-only Database explorer, saved
