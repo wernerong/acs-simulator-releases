@@ -15,6 +15,35 @@ retains access decisions, PIN verification, modes, alarms and backend reporting.
 This repository distributes installers and signed automatic updates. The source
 repository stays private. **No GitHub account or GitHub token is needed.**
 
+## Version 6.0.0
+
+The application now uses **C# and React**, retaining door/reader controls, Key
+Cabinets, scenario plays, diagnostics, issue/test recording and all 17 MCP tools.
+Fresh installations include controller **20261029.1 / 900c3489** and the latest
+face/iris compatibility libraries. Existing installations retain their selected
+firmware, local login, controller identity, settings and data.
+
+This distribution excludes IEI/perimeter integration, Rack Management, enrolment
+and Sales Demo. **Key Cabinets remain included.** No fixed controller DLL, method
+hash, MVID or firmware-version allowlist is imposed; runtime/platform and
+structural compatibility checks still apply.
+
+Already running 5.8? Keep using **Start.cmd from your original folder** and leave
+Docker running for the signed automatic update. Do not uninstall to upgrade. The
+new 6.0 launcher detects older installed images and asks you to finish that update
+before using a newly extracted folder.
+
+Native Linux x64 and ARM64 release validation passed for installation, restart/persistence,
+HTTP/MCP, database migration/backup/rollback, signed updates, updater replacement,
+unhealthy-image rollback and distribution audits. Actual Windows Docker Desktop,
+physical readers/ISMP and endurance have not been retested for this release.
+The previous full migration comparison remains historical baseline evidence;
+current release-profile tests are recorded separately.
+Update/rollback fixtures use the current C# runtime with preserved legacy command
+contracts. The actual 5.8 updater process has not been run against the 6.0 images;
+no Python is executed for this release preparation, so that complete upgrade path
+remains unverified.
+
 ## Install and start
 
 You need a Windows x64 PC, Docker Desktop running its Linux/WSL2 engine, and
@@ -35,9 +64,11 @@ configuration is synchronized. Do not reuse another controller's identity.
 
 ## Explore the simulator
 
-Screenshots show the actual 5.6.1 interface with synthetic demo data, not a live
-installation. Names, cards, keys and incident details are examples. Available
-devices and controls depend on your controller configuration and firmware.
+These are **historical screenshots of version 5.6.1**, illustrating retained
+features with synthetic sample data. The 6.0.0 React interface, navigation and
+version labels can differ. Names, cards, keys and incident details are examples.
+Available devices and controls depend on your controller configuration and firmware;
+the excluded features listed above are not included in this release.
 
 ### Doors and readers
 
@@ -51,8 +82,8 @@ Serial and IP readers support the implemented card/PIN flows, including Normal,
 Secure and Supervised access. Door models include EM locks, HSM120/HSM220,
 sliding doors, starter doors, 120-degree turnstiles and optical gates.
 The controller decides access and relocking; a button press is not an access grant.
-Windows 5.7.0 includes enrolled/unrecognised face inputs and a calibrated Baidu
-RGB comparison adapter for compatible templates. The controller retains matching
+Windows 6.0.0 includes enrolled/unrecognised face inputs and the current C#
+face/iris comparison libraries for compatible templates. The controller retains matching
 thresholds and access decisions. Unsupported biometric formats and multi-person
 IP flows are not simulated. Physical reader networking/source-IP mapping requires
 separate validation on Docker hosts.
@@ -60,8 +91,8 @@ separate validation on Docker hosts.
 An optional **Linux ARM64 biometric runtime** is provided as a separate release
 download for native simulator deployments. It contains independent face/iris
 comparison libraries and deployment notes, without source or vendor SDK files.
-It does not enable Windows iris support. Enrollment is excluded from both the
-Windows package and this SDK download.
+The Windows 6.0.0 images already carry their own face/iris libraries. Enrolment is
+excluded from both the Windows package and this SDK download.
 
 <details>
 <summary>See the dashboard and navigation</summary>
@@ -100,10 +131,11 @@ remains pending. Compatible ACS reader firmware, network or serial settings, and
 backend reader configuration are required; arbitrary reader protocols are not
 translated.
 
-**The Windows Docker package does not currently expose physical-reader setup.**
-Docker networking/source-IP mapping and serial transport require separate
-validation. The optional ARM64 SDK download supports compatible native
-deployments; it does not enable Windows iris support.
+Physical-reader networking/source-IP mapping and USB serial transport require
+separate validation on Docker hosts. The optional ARM64 SDK download supports
+compatible native deployments; it is not a Pi installation package. Windows
+6.0.0 includes face/iris comparison libraries, but that does not establish live
+physical-reader or camera compatibility on Docker Desktop.
 
 ### Key cabinets
 
@@ -111,7 +143,8 @@ Choose a cardholder, request an authorized key or group, open the cabinet and
 take or return keys. Follow the on-screen visit steps and slot inventory.
 Check misplaced keys, exercise wrong-slot returns and observe controller outcomes.
 
-Version 5.8.0 detects the controller's cabinet API before each visit. Newer
+Version 6.0.0 retains the cabinet API detection introduced in 5.8.0. Before each visit,
+the simulator checks the controller's supported contract. Newer
 firmware uses controller-owned sessions; older branches retain their user/card
 API flow. Checkout, returns and two-card keys follow the detected contract.
 Expired or mismatched sessions require a new card tap, without silently retrying
@@ -234,8 +267,8 @@ You remain responsible for test actions and their backend effects.
 
 ### Full MCP tool catalog
 
-Public and private **Windows 5.8.0** packages both use MCP server **0.4.0** and
-expose these **17 tools**; Windows 5.7.0 already carries the same catalog.
+Public and private **Windows 6.0.0** packages both use MCP server **0.4.0** and
+expose these **17 tools**, retaining the existing catalog.
 Older installations may show fewer tools until updated. Reconnect/refresh your
 client's tool list after updating. All names remain discoverable while writes
 are disabled; permission is checked when a tool is called. The same token is
@@ -580,7 +613,7 @@ existing Raspberry Pi or Mac installations. Screenshots illustrate the shared
 simulator interface; host-specific setup and administration can differ.
 
 <details>
-<summary>Detailed setup, update behavior and 5.6.2 release changes</summary>
+<summary>Detailed setup, historical 5.6.x changes and current update guidance</summary>
 
 ## Windows x64
 
@@ -596,7 +629,10 @@ The public package contains no onboarding key, installed data, users/cards or
 device certificates. Never post your API key, passwords or private diagnostics here.
 Your laptop must be able to reach your backend; use only an authorized test backend.
 
-## Updates
+## Historical 5.6.x changes
+
+The following notes describe earlier releases. The current 6.0.0 version,
+bundled controller and feature scope are listed at the top of this page.
 
 ### Version 5.6.2
 
@@ -621,8 +657,8 @@ restoring removed uploaded environment overrides such as RabbitMQ EnableTLS.
 The Windows adapter already preserves effective settings and keeps that behavior.
 The Windows package does not deploy changes to a separate native Pi.
 
-The version stamp is **Simulator v5.6.2**. Bundled firmware and schema are unchanged
-from 5.6.1; automatic updates preserve existing selected firmware and local data.
+The 5.6.2 release displayed **Simulator v5.6.2**. Its bundled firmware and schema
+were unchanged from 5.6.1; automatic updates preserved selected firmware and local data.
 
 ### Version 5.6.1
 
@@ -632,7 +668,7 @@ firmware ZIP with its own managed dependencies, including different branches.
 This fixes the rejection of otherwise compatible builds in 5.6.0 and earlier
 managed releases. Both public and private installers share the fix.
 
-Fresh installations use the updated table schema: key tracking includes names
+Version 5.6.1 introduced an updated table schema: key tracking includes names
 for the person taking/returning a key, and face templates support 4000 characters.
 Existing installations receive the same three additive changes before controller
 startup, with a retained database backup. No existing records are deleted or
@@ -717,7 +753,9 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-Fresh installations carry only controller build **20261008.6**, commit **8c92e188**.
+## Current 6.0.0 deployment and update guidance
+
+Fresh 6.0.0 installations carry controller build **20261029.1**, commit **900c3489**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
@@ -734,16 +772,20 @@ in the simulator. Updates wait for controller administration jobs and active
 scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
 Docker Desktop/Windows upgrades and incompatible database migrations are not
-automatic. Version 5.6.1 includes only the reviewed additive schema changes above.
+automatic. Version 6.0.0 retains the earlier additive schema changes and adds two
+nullable VMS grace-period columns required by the bundled controller, with a
+database backup before migration. Existing records and migration history remain.
 
 **Start.cmd** runs it. **Stop.cmd** stops it without deleting data.
 **Diagnose.cmd** includes the update status. **Uninstall.cmd** asks for confirmation
 and deletes this installation's local data. Do not use Uninstall to upgrade.
 
-If you already use the standalone r4 ZIP, stop r4 and run Start from the new
-update-enabled package once, on the same Docker Desktop engine. The existing
-installation is retained. Use only the new Start/Stop launchers thereafter; old
-standalone launchers do not understand automatic updates. Keep a backup first.
+If you use standalone r4 without an updater, keep a backup, stop r4 and use the
+[5.8 update-enabled package](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v5.8.0)
+once on the same Docker Desktop engine. Then keep its Start/Stop folder and leave
+it running to receive the signed 6.0 update. The 6.0 launcher deliberately refuses
+to operate old runtime aliases; standalone r4 has no automatic updater of its own.
+Do not uninstall or remove volumes during this transition.
 
 This release channel is for Windows x64. Existing Raspberry Pi and Mac installs
 are not enrolled or modified. This is a test simulator, not a production access
