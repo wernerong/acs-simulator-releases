@@ -23,8 +23,8 @@ Fresh installations include controller **20261029.1 / 900c3489** and the latest
 face/iris compatibility libraries. Existing installations retain their selected
 firmware, local login, controller identity, settings and data.
 
-This distribution excludes IEI/perimeter integration, Rack Management, enrolment
-and Sales Demo. **Key Cabinets remain included.** No fixed controller DLL, method
+This distribution excludes AgilFence, external events, IEI/perimeter integration,
+Rack Management, enrolment and Sales Demo. **Key Cabinets remain included.** No fixed controller DLL, method
 hash, MVID or firmware-version allowlist is imposed; runtime/platform and
 structural compatibility checks still apply.
 
@@ -33,16 +33,20 @@ Docker running for the signed automatic update. Do not uninstall to upgrade. The
 new 6.0 launcher detects older installed images and asks you to finish that update
 before using a newly extracted folder.
 
-Native Linux x64 and ARM64 release validation passed for installation, restart/persistence,
-HTTP/MCP, database migration/backup/rollback, signed updates, updater replacement,
-unhealthy-image rollback and distribution audits. Actual Windows Docker Desktop,
-physical readers/ISMP and endurance have not been retested for this release.
-The previous full migration comparison remains historical baseline evidence;
-current release-profile tests are recorded separately.
-Update/rollback fixtures use the current C# runtime with preserved legacy command
-contracts. The actual 5.8 updater process has not been run against the 6.0 images;
-no Python is executed for this release preparation, so that complete upgrade path
-remains unverified.
+The corrected 6.0.0 restores **Manage > Physical readers** for IP selection and
+adds **Check for updates** beside Sign out. The installed updater still verifies
+signatures and waits for active tests or controller administration to finish.
+The release schema matches the supplied upgrade script: 53 tables, 487 columns
+and 54 primary/unique constraints, including nullable VMS grace-period fields.
+
+Native x64 and ARM64 validation covers installation, restart/persistence,
+HTTP/MCP, database backup/rollback, signed updates, updater replacement,
+unhealthy-image rollback and distribution audits. The corrected packages also
+pass fresh Windows Docker Desktop checks and a real automatic 5.8.0 upgrade using
+the published GitHub feed, retaining selected firmware, login, identity and data.
+The previous full migration comparison remains baseline evidence; exact-source
+release checks are recorded separately. Physical readers/ISMP, Windows sleep/resume
+and endurance remain separate hardware/host acceptance checks.
 
 ## Install and start
 
@@ -117,8 +121,12 @@ flowchart LR
     Controller <-->|"Transactions and configuration"| Backend["ACS backend"]
 ```
 
-The native Pi's **Manage → Physical readers** page selects physical or simulated
-operation using the current controller configuration.
+**Manage > Physical readers** selects physical or simulated IP readers using
+the current controller configuration on both native Pi and Windows 6.0.0.
+The Windows page shows the configured host LAN address and Docker-published TCP
+port. Use that endpoint on the reader and allow it through the host firewall;
+the port is retained during later updates. USB serial-reader setup remains
+native-Pi only.
 
 | Connection | How pairing works |
 | --- | --- |
@@ -247,8 +255,10 @@ saved firmware and selected controller version are retained. Simulator updates
 and controller firmware selection are separate. Offline or sleeping PCs catch up
 when they are running and connected again.
 
-Use **Stop.cmd** to stop without deleting data, and **Diagnose.cmd** to inspect
-update status. **Do not uninstall to upgrade**: Uninstall deletes local data after
+Use **Check for updates** beside Sign out to check immediately and see progress.
+It uses the same signed channel and does not bypass active-test, controller or
+maintenance guards. Use **Stop.cmd** to stop without deleting data, and
+**Diagnose.cmd** to inspect update status. **Do not uninstall to upgrade**: Uninstall deletes local data after
 confirmation. Keep the extracted launcher folder.
 
 ## MCP: optional client access
