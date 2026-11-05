@@ -123,10 +123,13 @@ flowchart LR
 
 **Manage > Physical readers** selects physical or simulated IP readers using
 the current controller configuration on both native Pi and Windows 6.0.0.
-The Windows page shows the configured host LAN address and Docker-published TCP
-port. Use that endpoint on the reader and allow it through the host firewall;
-the port is retained during later updates. USB serial-reader setup remains
-native-Pi only.
+The Windows page shows the configured host LAN address and **TCP 1900** by default.
+Use that endpoint on the reader and allow TCP 1900 through the host firewall.
+Fresh installs map host 1900 to controller 1900. Updates migrate automatically
+assigned ports (such as 56350) and preserve explicit custom ports. To choose a
+custom port, set `ACS_READER_PORT` in the installer's `.env` before starting.
+A port conflict fails safely and restores the previous endpoint; it does not
+silently select another random port. USB serial setup remains native-Pi only.
 
 | Connection | How pairing works |
 | --- | --- |
