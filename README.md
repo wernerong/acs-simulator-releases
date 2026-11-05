@@ -41,9 +41,11 @@ and 54 primary/unique constraints, including nullable VMS grace-period fields.
 
 Native x64 and ARM64 validation covers installation, restart/persistence,
 HTTP/MCP, database backup/rollback, signed updates, updater replacement,
-unhealthy-image rollback and distribution audits. The corrected packages also
-pass fresh Windows Docker Desktop checks and a real automatic 5.8.0 upgrade using
-the published GitHub feed, retaining selected firmware, login, identity and data.
+unhealthy-image rollback and distribution audits. The TCP 1900 correction also
+passes fresh Windows Docker Desktop checks and normal scheduled upgrades from
+the preceding 6.0.0, including migration from a random port to 1900. The earlier
+correction verified the original 5.8.0 updater against the published GitHub feed.
+Selected firmware, login, identity and data are retained.
 The previous full migration comparison remains baseline evidence; exact-source
 release checks are recorded separately. Physical readers/ISMP, Windows sleep/resume
 and endurance remain separate hardware/host acceptance checks.
