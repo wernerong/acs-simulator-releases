@@ -15,40 +15,19 @@ retains access decisions, PIN verification, modes, alarms and backend reporting.
 This repository distributes installers and signed automatic updates. The source
 repository stays private. **No GitHub account or GitHub token is needed.**
 
-## Version 6.0.0
+## Version 6.1.0
 
-The application now uses **C# and React**, retaining door/reader controls, Key
-Cabinets, scenario plays, diagnostics, issue/test recording and all 17 MCP tools.
-Fresh installations include controller **20261029.1 / 900c3489** and the latest
-face/iris compatibility libraries. Existing installations retain their selected
-firmware, local login, controller identity, settings and data.
+Both new installations and automatic updates include reader card lock and timed feedback, serial/IP reboot with fresh configuration, controller-directed credential workflows, standalone serial/IP lift readers, current cabinet compatibility, mode-file settings, family-aware transaction labels and ABLOY EL560/EL561 door/scenario controls. Manage > Physical readers now includes applicable standalone IP/lift readers alongside CAU readers.
 
-This distribution excludes AgilFence, external events, IEI/perimeter integration,
-Rack Management, enrolment and Sales Demo. **Key Cabinets remain included.** No fixed controller DLL, method
-hash, MVID or firmware-version allowlist is imposed; runtime/platform and
-structural compatibility checks still apply.
+Fresh installations include only controller **20261123.4 / 694e0029**. Both **.NET 8 and .NET 10** Core/ASP.NET runtimes are available; each firmware's runtimeconfig selects its runtime. Existing users retain selected firmware, login, identity, settings, database and saved tests. There is no controller DLL/hash/version allowlist; structural and platform requirements still apply.
 
-Already running 5.8? Keep using **Start.cmd from your original folder** and leave
-Docker running for the signed automatic update. Do not uninstall to upgrade. The
-new 6.0 launcher detects older installed images and asks you to finish that update
-before using a newly extracted folder.
+Public packages have empty onboarding credentials. This distribution excludes AgilFence, external events, IEI/perimeter, racks, enrolment and Sales Demo. Key Cabinets, normal scenarios, diagnostics, issue recording and MCP remain included.
 
-The corrected 6.0.0 restores **Manage > Physical readers** for IP selection and
-adds **Check for updates** beside Sign out. The installed updater still verifies
-signatures and waits for active tests or controller administration to finish.
-The release schema matches the supplied upgrade script: 53 tables, 487 columns
-and 54 primary/unique constraints, including nullable VMS grace-period fields.
+Already running 5.8? Keep using **Start.cmd from your original folder** and leave Docker running for the signed automatic update. Do not uninstall to upgrade. The original 5.8.0 scheduled updater and the owner laptop have been verified upgrading to 6.1.0 while retaining protected data. Check for updates is beside Sign out; active tests/controller administration defer updates.
 
-Native x64 and ARM64 validation covers installation, restart/persistence,
-HTTP/MCP, database backup/rollback, signed updates, updater replacement,
-unhealthy-image rollback and distribution audits. The TCP 1900 correction also
-passes fresh Windows Docker Desktop checks and normal scheduled upgrades from
-the preceding 6.0.0, including migration from a random port to 1900. The earlier
-correction verified the original 5.8.0 updater against the published GitHub feed.
-Selected firmware, login, identity and data are retained.
-The previous full migration comparison remains baseline evidence; exact-source
-release checks are recorded separately. Physical readers/ISMP, Windows sleep/resume
-and endurance remain separate hardware/host acceptance checks.
+Native x64/ARM64 release checks cover fresh/restarted/configured HTTP and MCP, schema, image replacement, rollback and signatures. Additional isolated acceptance switches real controller firmware from .NET10 to .NET8 and back using each selected version's saved settings, with the same PID active for at least 10 seconds at each stage. Newer settings can refer to libraries absent from an older firmware build; runtime selection and configuration compatibility are separate. Exact-source release checks supplement a reviewed full-matrix baseline; the full matrix was not rerun on these images. Physical reader/backend actions, Windows sleep/resume and endurance are separate acceptance.
+
+Simulator artifact source: `2dd12ad715cbc242a91817ddd76f5cbcfee4fd80`. [Download and release notes](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v6.1.0).
 
 ## Install and start
 
@@ -71,7 +50,7 @@ configuration is synchronized. Do not reuse another controller's identity.
 ## Explore the simulator
 
 These are **historical screenshots of version 5.6.1**, illustrating retained
-features with synthetic sample data. The 6.0.0 React interface, navigation and
+features with synthetic sample data. The 6.1.0 React interface, navigation and
 version labels can differ. Names, cards, keys and incident details are examples.
 Available devices and controls depend on your controller configuration and firmware;
 the excluded features listed above are not included in this release.
@@ -86,18 +65,17 @@ door contact. Test exit requests, key switches, break glass and wiring faults.
 
 Serial and IP readers support the implemented card/PIN flows, including Normal,
 Secure and Supervised access. Door models include EM locks, HSM120/HSM220,
-sliding doors, starter doors, 120-degree turnstiles and optical gates.
+sliding doors, starter doors, 120-degree turnstiles, optical gates and ABLOY EL560/EL561 handle-clutch locks. ABLOY controls distinguish outside and inside opening, bolt state and manual handle tests; graphical scenarios use the same directional mechanics.
 The controller decides access and relocking; a button press is not an access grant.
-Windows 6.0.0 includes enrolled/unrecognised face inputs and the current C#
+Windows 6.1.0 includes enrolled/unrecognised face inputs and the current C#
 face/iris comparison libraries for compatible templates. The controller retains matching
-thresholds and access decisions. Unsupported biometric formats and multi-person
-IP flows are not simulated. Physical reader networking/source-IP mapping requires
+thresholds and access decisions. Unsupported biometric formats are not simulated. Controller-directed multiple-participant and concurrent-factor workflows are supported when configured by compatible firmware. Physical reader networking/source-IP mapping requires
 separate validation on Docker hosts.
 
 An optional **Linux ARM64 biometric runtime** is provided as a separate release
 download for native simulator deployments. It contains independent face/iris
 comparison libraries and deployment notes, without source or vendor SDK files.
-The Windows 6.0.0 images already carry their own face/iris libraries. Enrolment is
+The Windows 6.1.0 images already carry their own face/iris libraries. Enrolment is
 excluded from both the Windows package and this SDK download.
 
 <details>
@@ -124,7 +102,7 @@ flowchart LR
 ```
 
 **Manage > Physical readers** selects physical or simulated IP readers using
-the current controller configuration on both native Pi and Windows 6.0.0.
+the current controller configuration on both native Pi and Windows 6.1.0.
 The Windows page shows the configured host LAN address and **TCP 1900** by default.
 Use that endpoint on the reader and allow TCP 1900 through the host firewall.
 Fresh installs map host 1900 to controller 1900. Updates migrate automatically
@@ -147,7 +125,7 @@ translated.
 Physical-reader networking/source-IP mapping and USB serial transport require
 separate validation on Docker hosts. The optional ARM64 SDK download supports
 compatible native deployments; it is not a Pi installation package. Windows
-6.0.0 includes face/iris comparison libraries, but that does not establish live
+6.1.0 includes face/iris comparison libraries, but that does not establish live
 physical-reader or camera compatibility on Docker Desktop.
 
 ### Key cabinets
@@ -156,7 +134,7 @@ Choose a cardholder, request an authorized key or group, open the cabinet and
 take or return keys. Follow the on-screen visit steps and slot inventory.
 Check misplaced keys, exercise wrong-slot returns and observe controller outcomes.
 
-Version 6.0.0 retains the cabinet API detection introduced in 5.8.0. Before each visit,
+Version 6.1.0 retains the cabinet API detection introduced in 5.8.0. Before each visit,
 the simulator checks the controller's supported contract. Newer
 firmware uses controller-owned sessions; older branches retain their user/card
 API flow. Checkout, returns and two-card keys follow the detected contract.
@@ -282,7 +260,7 @@ You remain responsible for test actions and their backend effects.
 
 ### Full MCP tool catalog
 
-Public and private **Windows 6.0.0** packages both use MCP server **0.4.0** and
+Public and private **Windows 6.1.0** packages both use MCP server **0.4.0** and
 expose these **17 tools**, retaining the existing catalog.
 Older installations may show fewer tools until updated. Reconnect/refresh your
 client's tool list after updating. All names remain discoverable while writes
@@ -320,6 +298,7 @@ invent a device route.
 
 - **Doors/readers:** contact open/close/stop, exit press/release, lock-feedback
   fault/auto, key switch, break glass, wiring faults and simulated reader tamper.
+- **ABLOY handles:** open from outside/inside, hold or release the selected handle. The configured model and controller output determine availability; opening is not an access grant.
 - **Turnstiles:** IN/OUT 120-degree or optical passage, subject to the existing
   controller release and direction guards.
 - **Inputs/outputs:** LSDI normal/event/line cut/short and DOR open/close overrides.
@@ -424,6 +403,18 @@ Each wiring control fixes `input` to one of `contact`, `lock`, `exit`,
 to `in` or `out`. Select the correct returned control; neither value is a
 caller parameter for these kinds. Removing a wiring fault does not change a
 separately activated input back to normal.
+
+### ABLOY EL560/EL561 handles
+
+`list_controls` returns separate `handle` controls for the configured door's outside (`in`) and inside (`out`) sides. Select the returned control ID; direction is fixed by that control, not a caller parameter. Existing write opt-in, revision, request identity and scenario ownership guards apply.
+
+| Kind | Action | Caller parameters | Effect and restoration |
+| --- | --- | --- | --- |
+| `handle` | `open` | `{}` | Validate this side, turn the handle and open the contact; normal opening releases the handle automatically. EL560 inside exit is mechanical; EL561 requires enablement. No access grant is fabricated. Restore the contact with the returned `door` control's `close` action. |
+| `handle` | `turn` | `{}` | Hold the selected handle for a hardware test without moving the contact. Only the inside handle drives a configured exit monitor. Restore with this control's `release` action. |
+| `handle` | `release` | `{}` | Release this held handle and allow the bolt to throw. Contact position is independent; close the contact separately if it remains open. |
+
+An ABLOY `door.open` requires a bolt already retracted by a handle. It cannot bypass the lock model. An opposite-side held handle does not authorize directional opening. Controller alarms remain latched according to controller policy.
 
 ### Mechanical and optical turnstile passage
 
@@ -646,7 +637,7 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Historical 5.6.x changes
 
-The following notes describe earlier releases. The current 6.0.0 version,
+The following notes describe earlier releases. The current 6.1.0 version,
 bundled controller and feature scope are listed at the top of this page.
 
 ### Version 5.6.2
@@ -768,9 +759,9 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-## Current 6.0.0 deployment and update guidance
+## Current 6.1.0 deployment and update guidance
 
-Fresh 6.0.0 installations carry controller build **20261029.1**, commit **900c3489**.
+Fresh 6.1.0 installations carry controller build **20261123.4**, commit **694e0029**.
 Existing installations keep their selected firmware; the bundled build can be
 selected separately in Controller firmware. Saved user firmware is not deleted.
 Simulator version and controller firmware version are separate identifiers.
@@ -787,7 +778,7 @@ in the simulator. Updates wait for controller administration jobs and active
 scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
 Offline or sleeping laptops keep their installed version and catch up later.
 Docker Desktop/Windows upgrades and incompatible database migrations are not
-automatic. Version 6.0.0 retains the earlier additive schema changes and adds two
+automatic. Version 6.1.0 retains the earlier additive schema changes, including the two
 nullable VMS grace-period columns required by the bundled controller, with a
 database backup before migration. Existing records and migration history remain.
 
@@ -798,7 +789,7 @@ and deletes this installation's local data. Do not use Uninstall to upgrade.
 If you use standalone r4 without an updater, keep a backup, stop r4 and use the
 [5.8 update-enabled package](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v5.8.0)
 once on the same Docker Desktop engine. Then keep its Start/Stop folder and leave
-it running to receive the signed 6.0 update. The 6.0 launcher deliberately refuses
+it running to receive the signed 6.1.0 update. The current launcher deliberately refuses
 to operate old runtime aliases; standalone r4 has no automatic updater of its own.
 Do not uninstall or remove volumes during this transition.
 
