@@ -29,6 +29,25 @@ Native x64/ARM64 release checks cover fresh/restarted/configured HTTP and MCP, s
 
 Simulator artifact source: `2dd12ad715cbc242a91817ddd76f5cbcfee4fd80`. [Download and release notes](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v6.1.0).
 
+### Unreleased firmware compatibility fix - 26 November 2026
+
+Version 6.1.0 can reject newer controller firmware with
+"unsupported portable hardware-identity structure" when the firmware uses
+`InitializeNetworkInfo(INetworkInfoProvider)` and refreshable network snapshots.
+A compatibility fix is committed in the simulator source (`52a25e6`), but is
+**not included in the published 6.1.0 downloads or automatic updates**.
+
+The fix retains legacy firmware support and applies the configured advertised IP
+through initialization and later refreshes while preserving discovered MACs,
+readiness/retry decisions, last-valid snapshots and unrelated controller methods.
+All 54 isolated checks pass, including comparisons against a supplied controller
+build with synthetic network providers. Installed-package and live hardware
+acceptance remain separate; these checks do not qualify a new release.
+
+This is an unreleased source-fix notice only. The release version, installer
+downloads, checksums, signed update feed and published artifact source above
+remain unchanged. New packages will be published only after release qualification.
+
 ## Install and start
 
 You need a Windows x64 PC, Docker Desktop running its Linux/WSL2 engine, and
