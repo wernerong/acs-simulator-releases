@@ -15,38 +15,21 @@ retains access decisions, PIN verification, modes, alarms and backend reporting.
 This repository distributes installers and signed automatic updates. The source
 repository stays private. **No GitHub account or GitHub token is needed.**
 
-## Version 6.1.0
+## Version 6.2.0
 
-Both new installations and automatic updates include reader card lock and timed feedback, serial/IP reboot with fresh configuration, controller-directed credential workflows, standalone serial/IP lift readers, current cabinet compatibility, mode-file settings, family-aware transaction labels and ABLOY EL560/EL561 door/scenario controls. Manage > Physical readers now includes applicable standalone IP/lift readers alongside CAU readers.
+The update adds a guided cabinet reader for key selection, approval, withdrawal and return; an interactive Nova Plus simulated-reader screen; serial reader sessions and access-ledger correlation; reader feedback/card-lock refinements; and corrected ABLOY EL560/EL561 controls and downward handle animation. Existing lift, physical-reader, diagnostics, issue recording, scenarios and MCP features remain included.
 
-Fresh installations include only controller **20261123.4 / 694e0029**. Both **.NET 8 and .NET 10** Core/ASP.NET runtimes are available; each firmware's runtimeconfig selects its runtime. Existing users retain selected firmware, login, identity, settings, database and saved tests. There is no controller DLL/hash/version allowlist; structural and platform requirements still apply.
+**This release upgrades the controller once to 20261126.5 / 22336c84**, for both fresh installations and existing users. A brief restart is expected. Existing onboarding, user settings, identity, certificates, login, MCP configuration, database records, firmware library and saved tests are retained. New configuration keys use the incoming defaults. The approved schema uses `varchar(3000) NOT NULL` for both face-template columns, preserves data and blocks lossy conversions.
 
-Public packages have empty onboarding credentials. This distribution excludes AgilFence, external events, IEI/perimeter, racks, enrolment and Sales Demo. Key Cabinets, normal scenarios, diagnostics, issue recording and MCP remain included.
+After the one-time upgrade, you can select or upload other controller firmware normally. Both **.NET 8 and .NET 10** Core/ASP.NET runtimes remain available; the firmware's runtimeconfig selects its runtime. Ordinary firmware uploads have no approved-DLL hash/version list; structural and platform requirements still apply. When switching to an older build, its saved settings may be needed if current settings refer to libraries that older build does not contain.
 
-Already running 5.8? Keep using **Start.cmd from your original folder** and leave Docker running for the signed automatic update. Do not uninstall to upgrade. The original 5.8.0 scheduled updater and the owner laptop have been verified upgrading to 6.1.0 while retaining protected data. Check for updates is beside Sign out; active tests/controller administration defer updates.
+Public packages have empty onboarding credentials. This distribution excludes AgilFence, external events, IEI/perimeter, racks, enrolment and Sales Demo. Key Cabinets, normal scenarios, physical readers, diagnostics, issue recording and MCP remain included.
 
-Native x64/ARM64 release checks cover fresh/restarted/configured HTTP and MCP, schema, image replacement, rollback and signatures. Additional isolated acceptance switches real controller firmware from .NET10 to .NET8 and back using each selected version's saved settings, with the same PID active for at least 10 seconds at each stage. Newer settings can refer to libraries absent from an older firmware build; runtime selection and configuration compatibility are separate. Exact-source release checks supplement a reviewed full-matrix baseline; the full matrix was not rerun on these images. Physical reader/backend actions, Windows sleep/resume and endurance are separate acceptance.
+Already installed? Keep using **Start.cmd from your original folder** and leave Docker running for signed automatic updates. Do not uninstall. **Check for updates** is beside Sign out; active tests and controller administration defer updates. The complete Windows installer already includes its biometric compatibility runtime. The separate ARM64 runtime is only for advanced native Pi/Linux installations.
 
-Simulator artifact source: `2dd12ad715cbc242a91817ddd76f5cbcfee4fd80`. [Download and release notes](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v6.1.0).
+Simulator artifact source: `e07e60864d5006d20bc390b647a69291d55716dd`. [Download and release notes](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v6.2.0).
 
-### Unreleased firmware compatibility fix - 26 November 2026
-
-Version 6.1.0 can reject newer controller firmware with
-"unsupported portable hardware-identity structure" when the firmware uses
-`InitializeNetworkInfo(INetworkInfoProvider)` and refreshable network snapshots.
-A compatibility fix is committed in the simulator source (`52a25e6`), but is
-**not included in the published 6.1.0 downloads or automatic updates**.
-
-The fix retains legacy firmware support and applies the configured advertised IP
-through initialization and later refreshes while preserving discovered MACs,
-readiness/retry decisions, last-valid snapshots and unrelated controller methods.
-All 54 isolated checks pass, including comparisons against a supplied controller
-build with synthetic network providers. Installed-package and live hardware
-acceptance remain separate; these checks do not qualify a new release.
-
-This is an unreleased source-fix notice only. The release version, installer
-downloads, checksums, signed update feed and published artifact source above
-remain unchanged. New packages will be published only after release qualification.
+Verified with native x64/ARM64 checks, the original 5.8.0 automatic updater, the owner laptop automatic update from 6.1.0, a configured 6.1.0 migration fixture, and real .NET 10/8 firmware switching including a restart. Identity, effective settings and saved data are retained. These checks do not claim new physical-reader or backend acceptance.
 
 ## Install and start
 
@@ -69,7 +52,7 @@ configuration is synchronized. Do not reuse another controller's identity.
 ## Explore the simulator
 
 These are **historical screenshots of version 5.6.1**, illustrating retained
-features with synthetic sample data. The 6.1.0 React interface, navigation and
+features with synthetic sample data. The 6.2.0 React interface, navigation and
 version labels can differ. Names, cards, keys and incident details are examples.
 Available devices and controls depend on your controller configuration and firmware;
 the excluded features listed above are not included in this release.
@@ -86,7 +69,7 @@ Serial and IP readers support the implemented card/PIN flows, including Normal,
 Secure and Supervised access. Door models include EM locks, HSM120/HSM220,
 sliding doors, starter doors, 120-degree turnstiles, optical gates and ABLOY EL560/EL561 handle-clutch locks. ABLOY controls distinguish outside and inside opening, bolt state and manual handle tests; graphical scenarios use the same directional mechanics.
 The controller decides access and relocking; a button press is not an access grant.
-Windows 6.1.0 includes enrolled/unrecognised face inputs and the current C#
+Windows 6.2.0 includes enrolled/unrecognised face inputs and the current C#
 face/iris comparison libraries for compatible templates. The controller retains matching
 thresholds and access decisions. Unsupported biometric formats are not simulated. Controller-directed multiple-participant and concurrent-factor workflows are supported when configured by compatible firmware. Physical reader networking/source-IP mapping requires
 separate validation on Docker hosts.
@@ -94,7 +77,7 @@ separate validation on Docker hosts.
 An optional **Linux ARM64 biometric runtime** is provided as a separate release
 download for native simulator deployments. It contains independent face/iris
 comparison libraries and deployment notes, without source or vendor SDK files.
-The Windows 6.1.0 images already carry their own face/iris libraries. Enrolment is
+The Windows 6.2.0 images already carry their own face/iris libraries. Enrolment is
 excluded from both the Windows package and this SDK download.
 
 <details>
@@ -121,7 +104,7 @@ flowchart LR
 ```
 
 **Manage > Physical readers** selects physical or simulated IP readers using
-the current controller configuration on both native Pi and Windows 6.1.0.
+the current controller configuration on both native Pi and Windows 6.2.0.
 The Windows page shows the configured host LAN address and **TCP 1900** by default.
 Use that endpoint on the reader and allow TCP 1900 through the host firewall.
 Fresh installs map host 1900 to controller 1900. Updates migrate automatically
@@ -144,7 +127,7 @@ translated.
 Physical-reader networking/source-IP mapping and USB serial transport require
 separate validation on Docker hosts. The optional ARM64 SDK download supports
 compatible native deployments; it is not a Pi installation package. Windows
-6.1.0 includes face/iris comparison libraries, but that does not establish live
+6.2.0 includes face/iris comparison libraries, but that does not establish live
 physical-reader or camera compatibility on Docker Desktop.
 
 ### Key cabinets
@@ -153,7 +136,7 @@ Choose a cardholder, request an authorized key or group, open the cabinet and
 take or return keys. Follow the on-screen visit steps and slot inventory.
 Check misplaced keys, exercise wrong-slot returns and observe controller outcomes.
 
-Version 6.1.0 retains the cabinet API detection introduced in 5.8.0. Before each visit,
+Version 6.2.0 retains the cabinet API detection introduced in 5.8.0. Before each visit,
 the simulator checks the controller's supported contract. Newer
 firmware uses controller-owned sessions; older branches retain their user/card
 API flow. Checkout, returns and two-card keys follow the detected contract.
@@ -279,7 +262,7 @@ You remain responsible for test actions and their backend effects.
 
 ### Full MCP tool catalog
 
-Public and private **Windows 6.1.0** packages both use MCP server **0.4.0** and
+Public and private **Windows 6.2.0** packages both use MCP server **0.4.0** and
 expose these **17 tools**, retaining the existing catalog.
 Older installations may show fewer tools until updated. Reconnect/refresh your
 client's tool list after updating. All names remain discoverable while writes
@@ -656,7 +639,7 @@ Your laptop must be able to reach your backend; use only an authorized test back
 
 ## Historical 5.6.x changes
 
-The following notes describe earlier releases. The current 6.1.0 version,
+The following notes describe earlier releases. The current 6.2.0 version,
 bundled controller and feature scope are listed at the top of this page.
 
 ### Version 5.6.2
@@ -778,45 +761,43 @@ Use **Delete play** to remove a saved play after named confirmation; other plays
 and run history remain. Runs continue when the browser closes, but not while
 the host sleeps.
 
-## Current 6.1.0 deployment and update guidance
+## Current 6.2.0 deployment and update guidance
 
-Fresh 6.1.0 installations carry controller build **20261123.4**, commit **694e0029**.
-Existing installations keep their selected firmware; the bundled build can be
-selected separately in Controller firmware. Saved user firmware is not deleted.
-Simulator version and controller firmware version are separate identifiers.
+Both fresh installations and existing installations receiving this update use
+controller **20261126.5 / 22336c84** once. Existing effective settings take
+precedence over incoming defaults; new keys use those defaults. After this
+one-time upgrade, manual firmware selection remains available and survives
+restart. Saved user firmware is not deleted. .NET 8 and 10 remain included.
 
-Keep the extracted folder. While Docker and ACS Simulator are running, the updater
-checks this repository every five minutes. It verifies a signed release and the
-downloaded hashes, backs up the database, installs the simulator/runtime update and
-checks service health. An unsuccessful update restores the previous images.
-Expect a brief interruption of simulated devices during a successful update.
+Fresh Windows installations include the physical-reader bridge with host TCP
+1900 by default. Existing physical-reader installations that have not installed
+the bridge need its one-time host setup; this does not block simulator updates.
+Physical reader source-IP mapping and connectivity require host/network validation.
 
-Local login, onboarding details, controller identity, selected controller firmware,
-database, saved firmware, issue captures and enabled MCP configuration are retained. Firmware changes remain a separate action
-in the simulator. Updates wait for controller administration jobs and active
-scenario plays to finish. Interrupted scenarios requiring input review also hold updates.
-Offline or sleeping laptops keep their installed version and catch up later.
-Docker Desktop/Windows upgrades and incompatible database migrations are not
-automatic. Version 6.1.0 retains the earlier additive schema changes, including the two
-nullable VMS grace-period columns required by the bundled controller, with a
-database backup before migration. Existing records and migration history remain.
+Original 5.8.0 and 6.1.0 installations can receive 6.2.0 directly through the same
+signed public channel, including installations made from the private ZIP. Keep
+Docker and the simulator running with updates unpaused, or use Check for updates.
+Active scenarios and controller administration defer updates. Offline or sleeping
+laptops catch up later. Keep using Start.cmd from the original installation folder.
 
-**Start.cmd** runs it. **Stop.cmd** stops it without deleting data.
-**Diagnose.cmd** includes the update status. **Uninstall.cmd** asks for confirmation
-and deletes this installation's local data. Do not use Uninstall to upgrade.
+Local login, onboarding details, controller identity, effective settings, database,
+saved firmware, issue captures and enabled MCP configuration are retained. This
+release also applies the approved full schema, including both face-template
+columns at varchar(3000) NOT NULL. A verified private backup precedes migration;
+oversized values block narrowing without truncation. Arbitrary incompatible
+database migrations, Windows upgrades and Docker Desktop upgrades are not applied.
 
-If you use standalone r4 without an updater, keep a backup, stop r4 and use the
-[5.8 update-enabled package](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v5.8.0)
+Start.cmd runs it. Stop.cmd stops it without deleting data. Diagnose.cmd includes
+the update status. Uninstall.cmd asks for confirmation and deletes this
+installation's local data. Do not use Uninstall to upgrade.
+
+Standalone r4 has no automatic updater. For that legacy installation only, keep
+a backup and use the [5.8 update-enabled package](https://github.com/wernerong/acs-simulator-releases/releases/tag/windows-v5.8.0)
 once on the same Docker Desktop engine. Then keep its Start/Stop folder and leave
-it running to receive the signed 6.1.0 update. The current launcher deliberately refuses
-to operate old runtime aliases; standalone r4 has no automatic updater of its own.
-Do not uninstall or remove volumes during this transition.
+it running to receive 6.2.0. Do not uninstall or remove volumes during transition.
 
-This release channel is for Windows x64. Existing Raspberry Pi and Mac installs
-are not enrolled or modified. This is a test simulator, not a production access
-controller or a safety/alarm system. Public packages are inspectable software.
-
-Source pushes, drafts and prereleases do not update users. Only an approved signed
-stable release does. For support, contact the person who supplied your installer.
-
+This release channel is for Windows x64. Existing native Pi and Mac installs are
+not enrolled or modified. This is a test simulator, not a production access
+controller or safety/alarm system. Source pushes, drafts and prereleases do not
+update users; only an approved signed stable release does.
 </details>
